@@ -1,0 +1,19 @@
+body {
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+h2 {
+    display: inline-block;
+}
+
+.github-link {
+    float: right;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-break: keep-all;
+    background: #f3f3f3;
+    padding: 20px;
+    border-radius: 20px;
+}

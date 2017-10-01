@@ -17,9 +17,16 @@ module.exports = env => {
             options: {
               // The path to the webpack output relative to the project root
               path: '',
-              release: env.production,
+              release: env.production || env.release,
             }
           }
+        },
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader'
+          ]
         }
       ]
     },

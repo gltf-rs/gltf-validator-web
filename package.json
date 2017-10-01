@@ -12,8 +12,10 @@
   "author": "",
   "license": "Unlicense",
   "devDependencies": {
+    "css-loader": "^0.28.7",
     "gh-pages": "^1.0.0",
     "rust-wasm-loader": "^0.1.2",
+    "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^1.0.0-beta.2",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.9.1"
