@@ -12,7 +12,8 @@ function validate_url(gltfUrl) {
   let content = document.getElementById("content");
   content.innerHTML = "";
 
-  window.history.replaceState('', '', `${window.location.origin}?${gltfUrl}` )
+  let baseUrl = [location.protocol, '//', location.host, location.pathname].join('')
+  window.history.replaceState('', '', `${baseUrl}?${gltfUrl}` )
 
   let filename = gltfUrl.substring(gltfUrl.lastIndexOf('/')+1);
   appendToContent(`Downloading <a href="${gltfUrl}">${filename}</a> ...`)
