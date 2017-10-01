@@ -10,33 +10,62 @@ let wasmPromise = wasm.initialize({noExitRuntime: true}).then(module => {
 
 function validate_url(gltfUrl) {
   let filename = gltfUrl.substring(gltfUrl.lastIndexOf('/')+1);
-  appendToBody(`Downloading <a href="${gltfUrl}">${filename}</a> ...`)
+  appendToContent(`Downloading <a href="${gltfUrl}">${filename}</a> ...`)
   fetch(gltfUrl)
-    .then(response => response.arrayBuffer())
+    .then(response => {
+      if (response.ok) {
+        return response.arrayBuffer()
+      }
+      throw new Error("Error: " + response.statusText)
+    })
     .then(arrayBuffer => {
-      console.log("... received glTF data")
       let gltf_data = new Uint8Array(arrayBuffer);
+      appendToContent(" done", false)
 
-      console.log("waiting for WASM module to be ready")
+      let waited = false
+      promiseState(wasmPromise).then(state => {
+        if (state === 'pending') {
+          appendToContent("Waiting for WebAssembly initialization to finish ...")
+          waited = true;
+        }
+      })
+
       wasmPromise.then(() => {
-        console.log("validating...")
+        if (waited)
+          appendToContent(" done", false)
+        appendToContent("Validating glTF ...")
         let result = validate_gltf(gltf_data, gltf_data.length);
-        appendToBody(`<pre>${result}</pre>`)
-        console.log("... done")
+        appendToContent(" done. Result:", false)
+        appendToContent(`<pre>${result}</pre>`)
       })
 
     })
+    .catch(error => {
+      appendToContent(error.message, true, 'red')
+    })
 }
 
-function appendToBody(innerHTML) {
-  let el = document.createElement('div');
+function appendToContent(innerHTML, br=true, className="") {
+  let el = document.createElement('span');
   el.innerHTML = innerHTML;
-  document.body.appendChild(el)
+  el.className = className;
+  let content = document.getElementById("content")
+  if (br) {
+    content.appendChild(document.createElement("p"))
+  }
+  content.appendChild(el)
 }
 
 window.addEventListener('load', () => {
-  // let url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb"
-  // let url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF/Box.gltf"
-  let url = "https://raw.githubusercontent.com/gltf-rs/gltf/master/gltf-json/tests/minimal_accessor_invalid.gltf"
+  let url = location.search.substr(location.search.indexOf("?")+1);
+  url = url || "https://raw.githubusercontent.com/gltf-rs/gltf/master/gltf-json/tests/minimal_accessor_invalid.gltf"
+
   validate_url(url)
 });
+
+// https://stackoverflow.com/a/35820220/2858790
+function promiseState(p) {
+  const t = {};
+  return Promise.race([p, t])
+    .then(v => (v === t)? "pending" : "fulfilled", () => "rejected");
+}
