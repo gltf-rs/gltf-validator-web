@@ -9,6 +9,11 @@ let wasmPromise = wasm.initialize({noExitRuntime: true}).then(module => {
 })
 
 function validate_url(gltfUrl) {
+  let content = document.getElementById("content");
+  content.innerHTML = "";
+
+  window.history.replaceState('', '', `${window.location.origin}?${gltfUrl}` )
+
   let filename = gltfUrl.substring(gltfUrl.lastIndexOf('/')+1);
   appendToContent(`Downloading <a href="${gltfUrl}">${filename}</a> ...`)
   fetch(gltfUrl)
@@ -34,9 +39,13 @@ function validate_url(gltfUrl) {
         if (waited)
           appendToContent(" done", false)
         appendToContent("Validating glTF ...")
-        let result = validate_gltf(gltf_data, gltf_data.length);
-        appendToContent(" done. Result:", false)
-        appendToContent(`<pre>${result}</pre>`)
+        try {
+          let result = validate_gltf(gltf_data, gltf_data.length);
+          appendToContent(" done. Result:", false)
+          appendToContent(`<pre>${result}</pre>`)
+        } catch (e) {
+          appendToContent("Error calling into Rust: " + e, true, "red")
+        }
       })
 
     })
@@ -44,6 +53,7 @@ function validate_url(gltfUrl) {
       appendToContent(error.message, true, 'red')
     })
 }
+window.validate_url = validate_url
 
 function appendToContent(innerHTML, br=true, className="") {
   let el = document.createElement('span');
