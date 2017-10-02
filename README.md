@@ -6,6 +6,7 @@ Setup based on [rust-wasm-webpack-template](https://github.com/bwasty/rust-wasm-
 
 ## Development
 * set up Rust and Emscripten for compiling to WebAssembly, for example using the beginning of [this](https://medium.com/@ianjsikes/get-started-with-rust-webassembly-and-webpack-58d28e219635) guide.
+  - may require nightly Rust. Stable (1.20) is known to work on Linux, but not on macOS (`LinkError` in the browser)
 * `npm install`
 * `npm run start` (builds and starts dev server)
 * open http://localhost:8080 (or use `npm run start -- --open`)
