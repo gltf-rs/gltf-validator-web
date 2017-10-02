@@ -11,6 +11,7 @@ Setup based on [rust-wasm-webpack-template](https://github.com/bwasty/rust-wasm-
 * open http://localhost:8080 (or use `npm run start -- --open`)
 * change the Rust or JavaScript code and watch the browser reload after a few seconds
   - incremental compilation is recommended (`CARGO_INCREMENTAL=1`)
+  - The .wasm bundle size is several MB and takes quite a few seconds to parse. A release build is several times smaller/faster to load: `npm run start -- --env.release` (`--env.production` also minifies the JS code, but this takes again more time)
 
 ### Production build
 Use `npm run build` to generate an optimized build in the `dist` folder (compiling the Rust code in release mode and using UglifyJS for minifying the JavaScript code). To deploy to GitHub pages use `npm run deploy`.
