@@ -8,4 +8,5 @@ gltf = "0.9.2"
 
 [profile.release]
 # Optimize for size. The 'more agressive' `z` actually produces larger binaries
-opt-level = "s"
+# Only allowed on nightly, therefore commented out by default
+# opt-level = "s"
