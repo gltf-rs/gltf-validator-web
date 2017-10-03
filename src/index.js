@@ -8,7 +8,7 @@ let wasmPromise = wasm.initialize({noExitRuntime: true}).then(module => {
   validate_gltf = module.cwrap('validate_gltf', 'string', ['array', 'number'])
 })
 
-function validate_url(gltfUrl) {
+async function validate_url(gltfUrl) {
   let content = document.getElementById("content");
   content.innerHTML = "";
 
@@ -17,42 +17,38 @@ function validate_url(gltfUrl) {
 
   let filename = gltfUrl.substring(gltfUrl.lastIndexOf('/')+1);
   appendToContent(`Downloading <a href="${gltfUrl}">${filename}</a> ...`)
-  fetch(gltfUrl)
-    .then(response => {
-      if (response.ok) {
-        return response.arrayBuffer()
-      }
-      throw new Error("Error: " + response.statusText)
-    })
-    .then(arrayBuffer => {
-      let gltf_data = new Uint8Array(arrayBuffer);
+
+  try {
+    let response = await fetch(gltfUrl);
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`)
+    }
+    let arrayBuffer = await response.arrayBuffer()
+    let gltf_data = new Uint8Array(arrayBuffer);
+    appendToContent(" done", false)
+
+    let waited = false
+    if (await promiseState(wasmPromise) === 'pending') {
+      appendToContent("Waiting for WebAssembly initialization to finish ...")
+      waited = true;
+    }
+
+    await wasmPromise
+
+    if (waited)
       appendToContent(" done", false)
+    appendToContent("Validating glTF ...")
+    try {
+      let result = validate_gltf(gltf_data, gltf_data.length);
+      appendToContent(" done. Result:", false)
+      appendToContent(`<pre>${result}</pre>`)
+    } catch (error) {
+      throw new Error("Error calling into Rust: " + error)
+    }
 
-      let waited = false
-      promiseState(wasmPromise).then(state => {
-        if (state === 'pending') {
-          appendToContent("Waiting for WebAssembly initialization to finish ...")
-          waited = true;
-        }
-      })
-
-      wasmPromise.then(() => {
-        if (waited)
-          appendToContent(" done", false)
-        appendToContent("Validating glTF ...")
-        try {
-          let result = validate_gltf(gltf_data, gltf_data.length);
-          appendToContent(" done. Result:", false)
-          appendToContent(`<pre>${result}</pre>`)
-        } catch (e) {
-          appendToContent("Error calling into Rust: " + e, true, "red")
-        }
-      })
-
-    })
-    .catch(error => {
-      appendToContent(error.message, true, 'red')
-    })
+  } catch (error) {
+    appendToContent(error.message, true, 'red')
+  }
 }
 window.validate_url = validate_url
 

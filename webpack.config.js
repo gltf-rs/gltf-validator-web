@@ -1,5 +1,9 @@
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
+// TODO!!
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const CleanWebpackPlugin = require('clean-webpack-plugin');
+
 module.exports = env => {
   env = env || {} // undefined if webpack called without `--env`
   return {
@@ -97,7 +101,7 @@ module.exports = env => {
       })
     ] : [],
 
-    // devtool: 'source-map',
+    devtool: env.production ? undefined : 'source-map',
 
     devServer: {
       contentBase: __dirname + "/dist/",
